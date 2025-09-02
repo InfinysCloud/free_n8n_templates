@@ -4,6 +4,6 @@ For more detail you can visit : https://cloudkilat.com/  (B2c Cloud) or https://
  
 
 200+ Ready-to-Import n8n Workflows
-AI • Vector DB • LLM • DevOps • Finance • IoT • and more
+AI • Vector DB • LLM • DevOps • Finance • IoT • Odoo • Whatsapp • Telegrram  and more
 
 Free n8n templates to download
