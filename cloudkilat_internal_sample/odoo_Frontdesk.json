@@ -1,0 +1,526 @@
+{
+  "name": "Zidan-Frontdesk",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "visitor-status-update",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        220
+      ],
+      "id": "e020fd61-4e99-407b-84ff-f28464a5a916",
+      "name": "Webhook",
+      "webhookId": "380fe146-4ec4-4ecd-8f52-c59fcaec14a0"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.state }}",
+                    "rightValue": "planned",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2cb8e54c-0039-48b5-92ea-a6b638e242fb"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2e16b59b-a242-4964-98a9-3643c357a932",
+                    "leftValue": "={{ $json.body.state }}",
+                    "rightValue": "checked_in",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7554b266-86ea-4949-849a-7432ff19c797",
+                    "leftValue": "={{ $json.body.state }}",
+                    "rightValue": "checked_out",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4e7a6921-b858-4af8-a35c-1a9fdab5fe11",
+                    "leftValue": "={{ $json.body.state }}",
+                    "rightValue": "canceled",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -200,
+        180
+      ],
+      "id": "4a32d5e9-f87e-4561-8ac4-b3e9ff62016a",
+      "name": "Status Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "const htmlToText = html => html.replace(/<[^>]+>/g, '').replace(/\\n{2,}/g, '\\n\\n');\n\nreturn [{\n  json: {\n    visitor_phone: $json.body.visitor_phone || '',\n    visitor_email: $json.body.visitor_email || '',\n\n    whatsapp_message: htmlToText(`📅 Visit Planned\n\nHello *${$json.body.visitor_name || 'Visitor'}*, your visit has been scheduled.\n\n🧑‍💼 Host: ${$json.body.host_name || '-'}\n📍 Station: ${$json.body.station || '-'}\n🚪 Room: ${$json.body.room || '-'}\n\nWe look forward to your visit!`),\n\n    email_subject: `Visit Planned for ${$json.body.visitor_name || 'Visitor'}`,\n\n    email_body: `<div style=\"font-family: 'Segoe UI', Arial, sans-serif; font-size:16px; color:#333; line-height:1.6; max-width:600px; margin:0 auto;\">\n  <h2 style=\"margin-bottom:12px;\">📅 Visit Planned</h2>\n  <p>Hello <strong>${$json.body.visitor_name || 'Visitor'}</strong>,</p>\n  <p>Your visit has been scheduled with the following details:</p>\n  <table style=\"width:100%; border-collapse:collapse; margin:16px 0; font-size:15px;\">\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>🧑‍💼 Host</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.host_name || '-'}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>📍 Station</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.station || '-'}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>🚪 Room</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.room || '-'}</td>\n    </tr>\n  </table>\n  <p>We look forward to welcoming you soon!</p>\n  <p style=\"margin-top:30px;\">Best regards,<br/><strong>Visitor Management Team</strong></p>\n  <hr style=\"margin:30px 0;\" />\n  <small style=\"color:#888;\">This is an automated message. Please do not reply.</small>\n</div>`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c0082ed4-f3ca-49b8-b96a-f5baf39ed9ad",
+      "name": "Planned Massage"
+    },
+    {
+      "parameters": {
+        "jsCode": "const htmlToText = html => html.replace(/<[^>]+>/g, '').replace(/\\n{2,}/g, '\\n\\n');\n\nconst rawDuration = parseFloat($json.body.duration || '0');\nconst hours = Math.floor(rawDuration);\nconst minutes = Math.round((rawDuration - hours) * 60);\nlet formattedDuration = '';\nif (hours > 0) formattedDuration += `${hours} hours`;\nif (minutes > 0) formattedDuration += (hours > 0 ? ' ' : '') + `${minutes} minutes`;\nif (formattedDuration === '') formattedDuration = '0 minutes';\n\nreturn [{\n  json: {\n    visitor_phone: $json.body.visitor_phone || '',\n    visitor_email: $json.body.visitor_email || '',\n\n    whatsapp_message: htmlToText(`👋 Visit Completed\n\nHello *${$json.body.visitor_name || 'Visitor'}*, you have successfully checked out.\n\n🧑‍💼 Host: ${$json.body.host_name || '-'}\n📍 Station: ${$json.body.station || '-'}\n🚪 Room: ${$json.body.room || '-'}\n🕔 Duration: ${formattedDuration}\n\nThank you for visiting!`),\n\n    email_subject: `Visit Completed – ${$json.body.visitor_name || 'Visitor'}`,\n\n    email_body: `<div style=\"font-family: 'Segoe UI', Arial, sans-serif; font-size:16px; color:#333; line-height:1.6; max-width:600px; margin:0 auto;\">\n  <h2 style=\"margin-bottom:12px;\">👋 Visit Completed</h2>\n  <p>Hello <strong>${$json.body.visitor_name || 'Visitor'}</strong>,</p>\n  <p>Your visit has been completed successfully. Here are the details:</p>\n  <table style=\"width:100%; border-collapse:collapse; margin:16px 0; font-size:15px;\">\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>🧑‍💼 Host</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.host_name || '-'}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>📍 Station</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.station || '-'}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>🚪 Room</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.room || '-'}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>🕔 Duration</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${formattedDuration}</td>\n    </tr>\n  </table>\n  <p>Thank you for visiting us!</p>\n  <p style=\"margin-top:30px;\">Best regards,<br/><strong>Visitor Management Team</strong></p>\n  <hr style=\"margin:30px 0;\" />\n  <small style=\"color:#888;\">This is an automated message. Please do not reply.</small>\n</div>`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "id": "c500d63d-dd34-4d1e-a35c-50563f79e3e1",
+      "name": "Checked-Out Massage"
+    },
+    {
+      "parameters": {
+        "jsCode": "const htmlToText = html => html.replace(/<[^>]+>/g, '').replace(/\\n{2,}/g, '\\n\\n');\n\nreturn [{\n  json: {\n    visitor_phone: $json.body.visitor_phone || '',\n    visitor_email: $json.body.visitor_email || '',\n\n    whatsapp_message: htmlToText(`❌ Visit Cancelled\n\nHello *${$json.body.visitor_name || 'Visitor'}*, your visit has been cancelled.\n\n🧑‍💼 Host: ${$json.body.host_name || '-'}\n📍 Station: ${$json.body.station || '-'}\n🚪 Room: ${$json.body.room || '-'}\n\nPlease contact us if you need to reschedule.`),\n\n    email_subject: `Visit Cancelled – ${$json.body.visitor_name || 'Visitor'}`,\n\n    email_body: `<div style=\"font-family: 'Segoe UI', Arial, sans-serif; font-size:16px; color:#333; line-height:1.6; max-width:600px; margin:0 auto;\">\n  <h2 style=\"margin-bottom:12px;\">❌ Visit Cancelled</h2>\n  <p>Hello <strong>${$json.body.visitor_name || 'Visitor'}</strong>,</p>\n  <p>We regret to inform you that your visit has been cancelled. Here are the details:</p>\n  <table style=\"width:100%; border-collapse:collapse; margin:16px 0; font-size:15px;\">\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>🧑‍💼 Host</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.host_name || '-'}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>📍 Station</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.station || '-'}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>🚪 Room</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.room || '-'}</td>\n    </tr>\n  </table>\n  <p>Please contact us if you'd like to reschedule your visit.</p>\n  <p style=\"margin-top:30px;\">Best regards,<br/><strong>Visitor Management Team</strong></p>\n  <hr style=\"margin:30px 0;\" />\n  <small style=\"color:#888;\">This is an automated message. Please do not reply.</small>\n</div>`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        440
+      ],
+      "id": "bfea75fc-d3fa-4def-bddf-9a7ae67c52f9",
+      "name": "Cancelled Massage"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "39e1c877-d4f7-4366-8708-81323ea2035c",
+              "leftValue": "={{ $json.visitor_phone }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        140
+      ],
+      "id": "737b7df4-103c-4d4f-822b-1af6d925c1ac",
+      "name": "Check WhatsApp"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dd8e906d-70be-48a0-b7fe-40e8501f3449",
+              "leftValue": "={{ $json.visitor_email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        300
+      ],
+      "id": "730f2557-f656-47f6-8c06-43a53279ce96",
+      "name": "Check Email"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ambil hasil dari input (biasanya dari Merge)\nconst responses = $input.all();\nlet logMessage = '📬 Notification Status:\\n';\nlet sentCount = 0;\n\n// Iterasi semua response (dari WA & Email)\nresponses.forEach((response) => {\n  if (response.json) {\n    const res = response.json;\n\n    // WhatsApp\n    if (res.success !== undefined) {\n      logMessage += res.success ? '✅ WhatsApp sent\\n' : '❌ WhatsApp failed\\n';\n      if (res.success) sentCount++;\n    }\n\n    // Email\n    if (res.messageId || (res.accepted && res.accepted.length > 0)) {\n      logMessage += '✅ Email sent\\n';\n      sentCount++;\n    } else if (res.messageId === undefined && res.accepted === undefined) {\n      logMessage += '❌ Email failed\\n';\n    }\n  }\n});\n\nlogMessage += `📦 Total sent: ${sentCount}`;\nconsole.log(logMessage);\n\nreturn {\n  status: 'completed',\n  message: logMessage,\n  sent: sentCount,\n  time: new Date().toISOString()\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        940,
+        220
+      ],
+      "id": "6d908b02-1c5f-49c3-a9e4-ab2d54ecc958",
+      "name": "Log Results"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1080,
+        220
+      ],
+      "id": "86e97887-3d74-43d5-96c8-61736335a00d",
+      "name": "Webhook Response"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        800,
+        220
+      ],
+      "id": "038dc0c9-80c4-45d2-8cbd-0fc73ee94571",
+      "name": "Merge Notifications"
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@example.com",
+        "toEmail": "={{ $json.visitor_email }}",
+        "subject": "={{ $json.email_subject }}",
+        "html": "={{ $json.email_body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        560,
+        300
+      ],
+      "id": "4522bbb6-d677-41cb-82a5-587746944515",
+      "name": "Send email",
+      "webhookId": "16463b21-c4c6-410b-a30f-190dd26ed7d3"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "default",
+        "chatId": "={{ $json.visitor_phone }}",
+        "reply_to": "={{ $json.visitor_phone }}",
+        "text": "={{ $json.whatsapp_message }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        560,
+        140
+      ],
+      "id": "90cab65c-dc53-41d1-8a32-718878fb7ed7",
+      "name": "Send a text message",
+      "credentials": {
+        "wahaApi": {
+          "id": "2jdd8QPxCTqEEVKS",
+          "name": "WAHA account-dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const htmlToText = html => html.replace(/<[^>]+>/g, '').replace(/\\n{2,}/g, '\\n\\n');\n\nreturn [{\n  json: {\n    visitor_phone: $json.body.visitor_phone || '',\n    visitor_email: $json.body.visitor_email || '',\n\n    whatsapp_message: htmlToText(`✅ Check-In Confirmed\n\nHello *${$json.body.visitor_name || 'Visitor'}*, you have successfully checked in.\n\n🧑‍💼 Host: ${$json.body.host_name || '-'}\n📍 Station: ${$json.body.station || '-'}\n🚪 Room: ${$json.body.room || '-'}\n🕒 Check-In Time: ${$json.body.checkin_time || '-'}\n\nWi-Fi Access:\n📶 Name: ${$json.body.wifi_name || '-'}\n🔑 Password: ${$json.body.wifi_password || '-'}\n\nEnjoy your visit!`),\n\n    email_subject: `Check-In Confirmed for ${$json.body.visitor_name || 'Visitor'}`,\n\n    email_body: `<div style=\"font-family: 'Segoe UI', Arial, sans-serif; font-size:16px; color:#333; line-height:1.6; max-width:600px; margin:0 auto;\">\n  <h2 style=\"margin-bottom:12px;\">✅ Check-In Confirmed</h2>\n  <p>Hello <strong>${$json.body.visitor_name || 'Visitor'}</strong>,</p>\n  <p>You have successfully checked in. Here are your visit details:</p>\n  <table style=\"width:100%; border-collapse:collapse; margin:16px 0; font-size:15px;\">\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>🧑‍💼 Host</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.host_name || '-'}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>📍 Station</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.station || '-'}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>🚪 Room</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.room || '-'}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:10px; background:#f6f6f6; border:1px solid #ccc;\"><strong>🕒 Check-In Time</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.checkin_time || '-'}</td>\n    </tr>\n  </table>\n  <p style=\"margin:20px 0 10px;\"><strong>📶 Wi-Fi Access</strong></p>\n  <table style=\"width:100%; border-collapse:collapse; font-size:15px;\">\n    <tr>\n      <td style=\"padding:10px; background:#f9f9f9; border:1px solid #ccc;\"><strong>📶 Name</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.wifi_name || '-'}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:10px; background:#f9f9f9; border:1px solid #ccc;\"><strong>🔑 Password</strong></td>\n      <td style=\"padding:10px; border:1px solid #ccc;\">${$json.body.wifi_password || '-'}</td>\n    </tr>\n  </table>\n  <p style=\"margin-top:30px;\">Enjoy your visit!</p>\n  <p style=\"margin-top:30px;\">Best regards,<br/><strong>Visitor Management Team</strong></p>\n  <hr style=\"margin:30px 0;\" />\n  <small style=\"color:#888;\">This is an automated message. Please do not reply.</small>\n</div>`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        160
+      ],
+      "id": "c49be6e2-e096-4493-bdae-70b6c6a2ce63",
+      "name": "Checked-In Massage"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Status Switch": {
+      "main": [
+        [
+          {
+            "node": "Planned Massage",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Checked-In Massage",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Checked-Out Massage",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cancelled Massage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Status Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Planned Massage": {
+      "main": [
+        [
+          {
+            "node": "Check WhatsApp",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Checked-Out Massage": {
+      "main": [
+        [
+          {
+            "node": "Check WhatsApp",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancelled Massage": {
+      "main": [
+        [
+          {
+            "node": "Check WhatsApp",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Email": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Results": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Notifications": {
+      "main": [
+        [
+          {
+            "node": "Log Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email": {
+      "main": [
+        [
+          {
+            "node": "Merge Notifications",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Merge Notifications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Checked-In Massage": {
+      "main": [
+        [
+          {
+            "node": "Check WhatsApp",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f7e136d8-c833-4913-9588-66898d0a2a42",
+  "meta": {
+    "instanceId": "8a557bfc962390eae179faa8b9f45afcfd3a1e25a6c9fb6eeee9854eef6667a6"
+  },
+  "id": "0t7Lf4cxjhfR19Sm",
+  "tags": []
+}

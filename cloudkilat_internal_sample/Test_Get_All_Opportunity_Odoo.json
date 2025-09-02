@@ -1,0 +1,198 @@
+{
+  "name": "Test Get All Opportunity Odoo",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        -120
+      ],
+      "id": "70e412ff-0acc-461a-9463-bcb8d9c31340",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "resource": "opportunity",
+        "operation": "getAll",
+        "limit": 2,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        220,
+        0
+      ],
+      "id": "1977e354-27f7-4f09-ba58-7532488b149c",
+      "name": "Odoo",
+      "alwaysOutputData": true,
+      "credentials": {
+        "odooApi": {
+          "id": "O2CryX59OuFu8wuu",
+          "name": "Odoo account  https://odoo-ce.atisicloud.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -100,
+        100
+      ],
+      "id": "d17f9181-3a48-4ec0-a81e-aa4726df074d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "fromEmail": "lisa@isi.co.id",
+        "toEmail": "agusto@isi.co.id",
+        "subject": "={{ $('Odoo').item.json.type }} - {{ $('Odoo').item.json.partner_name }}",
+        "html": "=Type : {{ $('Odoo').item.json.type }} <br/><br/>\n\nName : {{ $('Odoo').item.json.partner_name }}  <br/>\nPhone : {{ $('Odoo').item.json.phone_sanitized }} <br/>  \nEmail :  {{ $('Odoo').item.json.email_normalized }} <br/>\nMessage : {{ $('Odoo').item.json.name }}\nCampaign :  {{ $('Odoo').item.json.campaign_id[1] }} <br/>\nWebsite : {{ $('Odoo').item.json.website }}  <br/>\n\n<br/>\nAnalyst Portofolio : <br/>\n-------------------- <br/>\n<br/>\n{{ $json.output }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1000,
+        -20
+      ],
+      "id": "cc1a649c-7605-4598-9951-358778e53ab9",
+      "name": "Send Email1",
+      "webhookId": "defc2e3a-f454-4945-ada6-bee5f6357cde",
+      "credentials": {
+        "smtp": {
+          "id": "tM6AumUIGRK7zTc5",
+          "name": "SMTP account-lisa@isi.co.id"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Find a small brief about Company with URL :  {{ $json.website }} and results translate it all  into indonesia languange\n\n\nTools like Google Search Engine, Yahoo Search Engine,LinkedIn and company website itself.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        420,
+        -220
+      ],
+      "id": "f217ecf3-5876-41d5-b267-83d5c78da965",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        380,
+        160
+      ],
+      "id": "daed3359-1af8-4e48-b27e-b36829f9420d",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "xh7JbWeYhgruWhSG",
+          "name": "Groq account-agusto"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Odoo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Odoo": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Odoo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email1": {
+      "main": [
+        []
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ed4e96d5-fc43-48d3-8584-d01f3f0556de",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8a557bfc962390eae179faa8b9f45afcfd3a1e25a6c9fb6eeee9854eef6667a6"
+  },
+  "id": "GEfWQeNAiqsjTBEh",
+  "tags": [
+    {
+      "createdAt": "2025-06-12T08:37:59.779Z",
+      "updatedAt": "2025-06-12T08:37:59.779Z",
+      "id": "EuwBzNfo4SVrprIs",
+      "name": "Odoo"
+    }
+  ]
+}

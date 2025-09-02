@@ -1,0 +1,249 @@
+{
+  "name": "Chat Bot Sample with AI",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "@devlikeapro/n8n-nodes-waha.wahaTrigger",
+      "typeVersion": 202502,
+      "position": [
+        -1560,
+        -180
+      ],
+      "id": "8d2da195-f1fd-4ba2-b736-d1105dd069b7",
+      "name": "WAHA Trigger",
+      "webhookId": "07f5e708-0bc9-4366-84a7-77233831e79a"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -540,
+        80
+      ],
+      "id": "a90cb067-9e29-4746-ba80-b8451b0ff976",
+      "name": "Wait",
+      "webhookId": "4d83eb0f-2b80-4caa-9aab-e20cc7890870"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Start Typing",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        -120,
+        100
+      ],
+      "id": "cf3dc356-fa18-497f-83c7-0542eebcc12f",
+      "name": "WAHA",
+      "credentials": {
+        "wahaApi": {
+          "id": "2jdd8QPxCTqEEVKS",
+          "name": "WAHA account-dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('WAHA Trigger').item.json.payload.body }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        260,
+        -80
+      ],
+      "id": "82f4906a-e4e0-4863-b055-cdc3a3bce968",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        140,
+        280
+      ],
+      "id": "a385ebed-f275-47a1-9007-59ba7fa04170",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "xh7JbWeYhgruWhSG",
+          "name": "Groq account-agusto"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('WAHA Trigger').item.json.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        500,
+        340
+      ],
+      "id": "9e7ae9ba-9c35-42dd-a61d-4c3ad29b414f",
+      "name": "Simple Memory",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('WAHA Trigger').item.json.session }}",
+        "chatId": "={{ $('WAHA Trigger').item.json.payload.from }}",
+        "text": "=Hi there, {{ $('WAHA Trigger').item.json.payload._data.notifyName }}\n\n{{ $json.output }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        860,
+        -60
+      ],
+      "id": "60be07d0-91f3-4b47-b3d7-36e0f0ea4511",
+      "name": "WAHA1",
+      "credentials": {
+        "wahaApi": {
+          "id": "2jdd8QPxCTqEEVKS",
+          "name": "WAHA account-dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a91a9cfa-b154-4300-b305-bb6fec5ea960",
+              "leftValue": "={{ $('WAHA Trigger').item.json.payload.from }}",
+              "rightValue": "628176057749@c.us",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1000,
+        80
+      ],
+      "id": "f3a35ca5-6ba2-4c68-ab84-9fe2159fdfb7",
+      "name": "If1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WAHA Trigger": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "WAHA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WAHA": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "WAHA1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f8c23d29-37ac-4df2-98a9-84118fed3618",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8a557bfc962390eae179faa8b9f45afcfd3a1e25a6c9fb6eeee9854eef6667a6"
+  },
+  "id": "RCTxhFZ7hTOB6eMB",
+  "tags": []
+}
