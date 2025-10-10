@@ -1,0 +1,924 @@
+{
+  "name": "Infinys  Whatsapp Blasting",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Start Typing",
+        "session": "={{ $('WA Triger').item.json.session }}",
+        "chatId": "={{ $('WA Triger').item.json.payload.from }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        -380,
+        0
+      ],
+      "id": "24b72083-bb7a-4762-b838-4a9e208d3fe2",
+      "name": "WAHA",
+      "credentials": {
+        "wahaApi": {
+          "id": "2jdd8QPxCTqEEVKS",
+          "name": "WAHA account-dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "custom",
+        "customResource": "infinys.whatsapp.incoming",
+        "fieldsToCreateOrUpdate": {
+          "fields": [
+            {
+              "fieldName": "name",
+              "fieldValue": "={{ $('WA Triger').item.json.payload._data.notifyName }}"
+            },
+            {
+              "fieldName": "from_number",
+              "fieldValue": "={{ $('WA Triger').item.json.payload._data.from }}"
+            },
+            {
+              "fieldName": "to_number",
+              "fieldValue": "={{ $('WA Triger').item.json.payload._data.to }}"
+            },
+            {
+              "fieldName": "raw_data",
+              "fieldValue": "={{ $('WA Triger').item.json.payload._data.body }}"
+            },
+            {
+              "fieldName": "hasmedia",
+              "fieldValue": "={{ $('WA Triger').item.json.payload.hasMedia }}"
+            },
+            {
+              "fieldName": "quotedMsgId",
+              "fieldValue": "={{ $('WA Triger').item.json.payload._data.id._serialized }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        -1100,
+        -20
+      ],
+      "id": "049766ab-6d77-41cb-9205-94c5ab01aa46",
+      "name": "Odoo",
+      "executeOnce": true,
+      "retryOnFail": true,
+      "credentials": {
+        "odooApi": {
+          "id": "dppnoAEXUpWNxtSb",
+          "name": "Odoo https://aurora.atisicloud.com/"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Insert to Odoo Database",
+        "height": 480,
+        "width": 2740,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2420,
+        -80
+      ],
+      "id": "6a405b18-d993-41a7-84cc-72d2e7202438",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1d669eb6-1287-441d-8f63-cbbebc1a551d",
+              "leftValue": "={{ $json.payload.from }}",
+              "rightValue": "@c",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "db86b5a4-f9ac-41fe-a6d3-41a97df4d042",
+              "leftValue": "={{ $json.payload.from }}",
+              "rightValue": "status@broadcast",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "eed03944-0e38-4a2e-9d21-f173d80dbeda",
+              "leftValue": "={{ $json.payload.body }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -2080,
+        40
+      ],
+      "id": "49199c23-2cea-4be6-ad74-26ee251a56f7",
+      "name": "Filter - on except @c (Chat)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Global Constants').item.json.constants.odoo_web_url }}isi/wa_incoming",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"token\": \"{{ $('Get Token').item.json.result.infinys_whatsapp_blasting_token }}\",\n  \"messages\" :[\n       {\n            \"id\": \"{{ $json.id }}\",\n            \"action\": \"update\"          \n       }\n   ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -840,
+        -20
+      ],
+      "id": "282a47d8-f060-4f90-8e87-9cb00367bdcc",
+      "name": "Update Wa Incomming"
+    },
+    {
+      "parameters": {
+        "content": "Webhook Send Message",
+        "height": 580,
+        "width": 2520,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2420,
+        420
+      ],
+      "id": "27a5bd45-20db-469f-97d1-75ec55ae4d1b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "756f6838-d79c-4d79-810f-2effde92ec95",
+              "leftValue": "={{ $json.body.contact }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2080,
+        800
+      ],
+      "id": "930328df-8212-4e0f-8eb2-28a937e58219",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "let bodyStr = $('Send Message API').first().json.body;\nlet contact = JSON.parse($('Send Message API').first().json.body.contact);\ncontact.messagestring = JSON.stringify(contact.message)\ncontact.bodyjson = JSON.stringify(bodyStr)\nreturn contact;\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1740,
+        740
+      ],
+      "id": "31f491fe-f103-4b0e-bb5a-2ad996fa636b",
+      "name": "Get json Body"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Start Typing",
+        "session": "={{ $('If').item.json.body.session }}",
+        "chatId": "={{ $('Get json Body').item.json.contact_whatsapp }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        -1540,
+        500
+      ],
+      "id": "be3ebb6b-1959-4809-9043-a9308a251af3",
+      "name": "Waha Typing",
+      "credentials": {
+        "wahaApi": {
+          "id": "2jdd8QPxCTqEEVKS",
+          "name": "WAHA account-dev"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1340,
+        520
+      ],
+      "id": "6c052dcb-2a2f-49d9-892c-88a072909f21",
+      "name": "Wait-delay",
+      "webhookId": "0ef3fa89-5e74-4023-b1c3-b98213237329"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send_message",
+        "authentication": "basicAuth",
+        "responseMode": "lastNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -2380,
+        580
+      ],
+      "id": "0ca9d534-7288-4e15-9b20-16859356d213",
+      "name": "Send Message API",
+      "webhookId": "04e21e61-b589-4ce2-a0ca-05bde02d1899",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "coj0k34fZ6in0fu9",
+          "name": "wa_mailing_blasting_basic_auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Global Constants1').item.json.constants.odoo_web_url }}isi/create_logsent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"token\": \"{{ $('Get Token1').item.json.result.infinys_whatsapp_blasting_token }}\",\n  \"messages\" :[\n       {\n            \"id\": \"{{ $('Get json Body').item.json.sent_id }}\",\n            \"config_id\": \"{{ $('If').item.json.body.wa_config_id }}\",\n            \"mailing_id\": \"{{ $('If').item.json.body.mailing_id }}\",\n            \"mailing_list_id\": \"{{ $('If').item.json.body.mailing_list }}\",\n            \"contact_id\": \"{{ $('Get json Body').item.json.contact_id }}\",\n            \"from_number\": \"{{ $('If').item.json.body.reply_to }}\",\n            \"to_number\": \"{{ $('Get json Body').item.json.contact_whatsapp }}\",\n            \"mailing_log_id\": \"{{ $('Send Message API').item.json.body.mailing_log_id }}\",\n            \"body\": {{ $('Get json Body').item.json.messagestring }},\n            \"json_message\": {{ $('Get json Body').item.json.bodyjson }},\n            \"result_from\": \"{{ $('Get json Body').item.json.contact_name }}\",\n            \"hasmedia\": \"{{ $json.hasMedia }}\",\n            \"mime_type\": \"text/plain\",\n            \"action\": \"update\"          \n       }\n   ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -500,
+        520
+      ],
+      "id": "03adb3de-7d85-4360-b017-776164f7a716",
+      "name": "Set Sent Log",
+      "executeOnce": true
+    },
+    {
+      "parameters": {},
+      "type": "@devlikeapro/n8n-nodes-waha.wahaTrigger",
+      "typeVersion": 202502,
+      "position": [
+        -2680,
+        -40
+      ],
+      "id": "05331899-a6eb-42a2-9437-95bbffdd697b",
+      "name": "WA Triger",
+      "webhookId": "44f2568b-9cb2-4cc4-95c8-367d9c21fd2c"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "15455ac8-65e5-4531-b1f3-883a9314294d",
+              "leftValue": "={{ $json.result.result[0].isNewUser }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "39518741-6dc5-4709-acb6-51667e6ae2a3",
+              "leftValue": "={{ $json.result.result[0].welcome_message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -580,
+        120
+      ],
+      "id": "7b7141cf-c018-4c70-875d-07b6bbfb278f",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const raw = $('WA Triger').first().json.me.id; // e.g., \"6281517018065@c.us\"\n  const phone = raw.split(\"@\")[0];\n  item.json.phonewa = phone;\n  return item;\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1600,
+        80
+      ],
+      "id": "616cabfe-0c53-4a87-80e6-d2b7399d406e",
+      "name": "get FromNumberTo"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('WA Triger').item.json.session }}",
+        "chatId": "={{ $('WA Triger').item.json.payload.from }}",
+        "reply_to": "={{ $('Update Wa Incomming').item.json.result.result[0].to_number }}",
+        "text": "={{ $('Get WA Config').item.json.result.result.welcome_message }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        80,
+        -20
+      ],
+      "id": "8997f224-565e-437e-88bd-54ae1572e52a",
+      "name": "Send Welcome Message",
+      "credentials": {
+        "wahaApi": {
+          "id": "2jdd8QPxCTqEEVKS",
+          "name": "WAHA account-dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Global Constants').item.json.constants.odoo_web_url }}isi/wa_config",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"token\": \"{{ $('Get Token').item.json.result.infinys_whatsapp_blasting_token }}\",\n  \"whatsappnumber\" : \"{{ $json.phonewa }}\"\n   \n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1360,
+        0
+      ],
+      "id": "1ef2d9ee-34aa-4962-b509-64b012a35229",
+      "name": "Get WA Config"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        40
+      ],
+      "id": "2c666a6d-68b9-44c7-bec6-d57815794f19",
+      "name": "Wait",
+      "webhookId": "a10df7f2-1d6e-46a8-af45-f604edae6e29"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Global Constants').item.json.constants.odoo_web_url }}isi/get_token",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1800,
+        40
+      ],
+      "id": "a1eb46a0-5318-4184-a491-c3679e2abe34",
+      "name": "Get Token"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Global Constants1').item.json.constants.odoo_web_url }}isi/get_token",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1920,
+        520
+      ],
+      "id": "b504a79f-1960-44f4-9560-18085f83f411",
+      "name": "Get Token1"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -340,
+        220
+      ],
+      "id": "3b2db19a-858a-4b66-9e63-559e60e5f289",
+      "name": "Wait1",
+      "webhookId": "fc6a42d0-e826-4a50-9d72-c94c934f7f17"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "be797f93-926f-49c2-976a-27beee6782c1",
+              "leftValue": "={{ $('Get json Body').item.json.hasmedia }}",
+              "rightValue": "True",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1120,
+        520
+      ],
+      "id": "4f7dca17-2429-4e01-8f7c-383a87f20eda",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('If').item.json.body.session }}",
+        "chatId": "={{ $('Get json Body').item.json.contact_whatsapp }}",
+        "reply_to": "={{ $('If').item.json.body.reply_to }}",
+        "text": "={{ $('Get json Body').item.json.message }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        -800,
+        780
+      ],
+      "id": "c3be6223-70f6-4ed8-a142-003e41b99490",
+      "name": "Send WA1",
+      "credentials": {
+        "wahaApi": {
+          "id": "2jdd8QPxCTqEEVKS",
+          "name": "WAHA account-dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('If').item.json.body.session }}",
+        "chatId": "={{ $('Get json Body').item.json.contact_whatsapp }}",
+        "reply_to": "={{ $('If').item.json.body.reply_to }}",
+        "text": "={{ $('Get json Body').item.json.message }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        -800,
+        500
+      ],
+      "id": "56189458-c3f5-4e63-a3e0-ecc3b53edbd3",
+      "name": "Send WA",
+      "credentials": {
+        "wahaApi": {
+          "id": "2jdd8QPxCTqEEVKS",
+          "name": "WAHA account-dev"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-globals.globalConstants",
+      "typeVersion": 1,
+      "position": [
+        -2340,
+        60
+      ],
+      "id": "eed2f871-46b9-4b4a-8833-b6b0d5385704",
+      "name": "Global Constants",
+      "credentials": {
+        "globalConstantsApi": {
+          "id": "rkGc2ExqbCYXHl6Q",
+          "name": "Frontdesk Config"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-globals.globalConstants",
+      "typeVersion": 1,
+      "position": [
+        -2160,
+        560
+      ],
+      "id": "09e556ee-abc8-4561-a84f-8fdde2a9038a",
+      "name": "Global Constants1",
+      "credentials": {
+        "globalConstantsApi": {
+          "id": "rkGc2ExqbCYXHl6Q",
+          "name": "Frontdesk Config"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Send Message API": [
+      {
+        "json": {
+          "headers": {
+            "connection": "keep-alive",
+            "host": "n8n-dev.atisicloud.com",
+            "x-forwarded-scheme": "https",
+            "x-forwarded-proto": "https",
+            "x-forwarded-for": "103.41.204.243",
+            "x-real-ip": "103.41.204.243",
+            "content-length": "485",
+            "user-agent": "python-requests/2.31.0",
+            "accept-encoding": "gzip, deflate",
+            "accept": "*/*",
+            "content-type": "application/json",
+            "authorization": "Basic YWRtaW46aXQyOHBmSHBSMzBoQ3IyYS1pc2k="
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "jsonrpc": "2.0",
+            "wa_config_id": "1",
+            "wa_config_name": "Default Configuration",
+            "mailing_id": "36",
+            "mailing_list": "0",
+            "mailing_list_name": "",
+            "mailing_log_id": "245",
+            "session": "default",
+            "reply_to": "6282315319401",
+            "contact": "{\"sent_id\": \"614\", \"contact_id\": \"14\", \"contact_name\": \"Agusto Xaverius\", \"contact_whatsapp\": \"628176057749\", \"message\": \"DEMO DEMO\", \"mime_type\": \"image/jpeg\", \"media_url\": \"/web/content/1749\", \"hasmedia\": \"True\"}"
+          },
+          "webhookUrl": "http://n8n-dev.atisicloud.com/webhook-test/send_message",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "WAHA": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Odoo": {
+      "main": [
+        [
+          {
+            "node": "Update Wa Incomming",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter - on except @c (Chat)": {
+      "main": [
+        [
+          {
+            "node": "Get Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Wa Incomming": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get Token1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get json Body": {
+      "main": [
+        [
+          {
+            "node": "Waha Typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Waha Typing": {
+      "main": [
+        [
+          {
+            "node": "Wait-delay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait-delay": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Message API": {
+      "main": [
+        [
+          {
+            "node": "Global Constants1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Sent Log": {
+      "main": [
+        []
+      ]
+    },
+    "WA Triger": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Global Constants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "WAHA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get FromNumberTo": {
+      "main": [
+        [
+          {
+            "node": "Get WA Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get WA Config": {
+      "main": [
+        [
+          {
+            "node": "Odoo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Token": {
+      "main": [
+        [
+          {
+            "node": "get FromNumberTo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Token1": {
+      "main": [
+        [
+          {
+            "node": "Get json Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Send WA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send WA1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WA1": {
+      "main": [
+        [
+          {
+            "node": "Set Sent Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WA": {
+      "main": [
+        [
+          {
+            "node": "Set Sent Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Global Constants": {
+      "main": [
+        [
+          {
+            "node": "Filter - on except @c (Chat)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Global Constants1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cfd19141-44f3-4898-b8a3-27ceee545229",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8a557bfc962390eae179faa8b9f45afcfd3a1e25a6c9fb6eeee9854eef6667a6"
+  },
+  "id": "AZbPdiIKjvqbvO4A",
+  "tags": []
+}
